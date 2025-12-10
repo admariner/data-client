@@ -23,6 +23,7 @@ const getType = require('getType');
 const decodeUriComponent = require('decodeUriComponent');
 const createRegex = require('createRegex');
 const makeString = require('makeString');
+const Object = require('Object');
 
 /*==============================================================================
 ==============================================================================*/
@@ -64,6 +65,7 @@ function runClient() {
     eventModel = addRequiredParametersToEventModel(eventModel);
     eventModel = addCommonParametersToEventModel(eventModel);
     eventModel = addClientIdToEventModel(eventModel, clientId);
+    if (eventModel._dcid_temp) Object.delete(eventModel, '_dcid_temp');
     return eventModel;
   });
 
@@ -573,6 +575,12 @@ function getClientId(eventModels) {
   if (dcid && dcid[0]) return dcid[0];
 
   if (data.generateClientId) {
+    for (let i = 0; i < eventModels.length; i++) {
+      const eventModel = eventModels[i];
+      const tempClientId = eventModel._dcid_temp;
+      if (tempClientId) return tempClientId;
+    }
+
     return (
       'dcid.1.' +
       getTimestampMillis() +
@@ -580,6 +588,7 @@ function getClientId(eventModels) {
       generateRandom(100000000, 999999999)
     );
   }
+
   return '';
 }
 
