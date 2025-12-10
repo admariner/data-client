@@ -1,6 +1,10 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/data-client'
 versions:
+  - sha: 7c813f3d19305a5b54e8c122e4c42728b10fbccf
+    changeNotes: |2
+      Fixed the Client ID auto generation when the _dcid cookie does not exist and multiple requests are sent at once.
+      Make sure to update the Data Tag in GTM Web as well.
   - sha: 3992d61eb8bc9f0314e9501ed6f6a86fd1671e8a
     changeNotes: |2
       Fix the return status when there is no default value to be returned.
