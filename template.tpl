@@ -391,47 +391,37 @@ function runClient() {
 function addCommonParametersToEventModel(eventModel) {
   if (!eventModel.ip_override) {
     if (eventModel.ip) eventModel.ip_override = eventModel.ip;
-    else if (eventModel.ipOverride)
-      eventModel.ip_override = eventModel.ipOverride;
+    else if (eventModel.ipOverride) eventModel.ip_override = eventModel.ipOverride;
     else eventModel.ip_override = getRemoteAddress();
   }
 
   if (!eventModel.user_agent) {
     if (eventModel.userAgent) eventModel.user_agent = eventModel.userAgent;
-    else if (getRequestHeader('User-Agent'))
-      eventModel.user_agent = getRequestHeader('User-Agent');
+    else if (getRequestHeader('User-Agent')) eventModel.user_agent = getRequestHeader('User-Agent');
   }
 
   if (!eventModel.language) {
     const acceptLanguageHeader = getRequestHeader('Accept-Language');
 
     if (acceptLanguageHeader) {
-      eventModel.language = acceptLanguageHeader
-        .split(';')[0]
-        .substring(0, 2)
-        .toLowerCase();
+      eventModel.language = acceptLanguageHeader.split(';')[0].substring(0, 2).toLowerCase();
     }
   }
 
   if (!eventModel.page_hostname) {
-    if (eventModel.pageHostname)
-      eventModel.page_hostname = eventModel.pageHostname;
-    else if (eventModel.hostname)
-      eventModel.page_hostname = eventModel.hostname;
+    if (eventModel.pageHostname) eventModel.page_hostname = eventModel.pageHostname;
+    else if (eventModel.hostname) eventModel.page_hostname = eventModel.hostname;
   }
 
   if (!eventModel.page_location) {
-    if (eventModel.pageLocation)
-      eventModel.page_location = eventModel.pageLocation;
+    if (eventModel.pageLocation) eventModel.page_location = eventModel.pageLocation;
     else if (eventModel.url) eventModel.page_location = eventModel.url;
     else if (eventModel.href) eventModel.page_location = eventModel.href;
   }
 
   if (!eventModel.page_referrer) {
-    if (eventModel.pageReferrer)
-      eventModel.page_referrer = eventModel.pageReferrer;
-    else if (eventModel.referrer)
-      eventModel.page_referrer = eventModel.referrer;
+    if (eventModel.pageReferrer) eventModel.page_referrer = eventModel.pageReferrer;
+    else if (eventModel.referrer) eventModel.page_referrer = eventModel.referrer;
     else if (eventModel.urlref) eventModel.page_referrer = eventModel.urlref;
   }
 
@@ -439,21 +429,17 @@ function addCommonParametersToEventModel(eventModel) {
 
   if (getType(eventModel.items) === 'array' && eventModel.items.length) {
     const firstItem = eventModel.items[0];
-    if (!eventModel.currency && firstItem.currency)
-      eventModel.currency = firstItem.currency;
+    if (!eventModel.currency && firstItem.currency) eventModel.currency = firstItem.currency;
     if (eventModel.items.length === 1) {
-      if (!eventModel.item_id && firstItem.item_id)
-        eventModel.item_id = firstItem.item_id;
-      if (!eventModel.item_name && firstItem.item_name)
-        eventModel.item_name = firstItem.item_name;
+      if (!eventModel.item_id && firstItem.item_id) eventModel.item_id = firstItem.item_id;
+      if (!eventModel.item_name && firstItem.item_name) eventModel.item_name = firstItem.item_name;
       if (!eventModel.item_brand && firstItem.item_brand)
         eventModel.item_brand = firstItem.item_brand;
       if (!eventModel.item_quantity && firstItem.quantity)
         eventModel.item_quantity = firstItem.quantity;
       if (!eventModel.item_category && firstItem.item_category)
         eventModel.item_category = firstItem.item_category;
-      if (!eventModel.item_price && firstItem.price)
-        eventModel.item_price = firstItem.price;
+      if (!eventModel.item_price && firstItem.price) eventModel.item_price = firstItem.price;
     }
     if (!eventModel.value) {
       const valueFromItems = eventModel.items.reduce((acc, item) => {
@@ -470,43 +456,31 @@ function addCommonParametersToEventModel(eventModel) {
   if (ecommerceAction) {
     if (!eventModel['x-ga-mp1-pa']) eventModel['x-ga-mp1-pa'] = ecommerceAction;
 
-    if (
-      ecommerceAction === 'purchase' &&
-      eventModel.ecommerce.purchase.actionField
-    ) {
+    if (ecommerceAction === 'purchase' && eventModel.ecommerce.purchase.actionField) {
       if (!eventModel['x-ga-mp1-tr'])
-        eventModel['x-ga-mp1-tr'] =
-          eventModel.ecommerce.purchase.actionField.revenue;
+        eventModel['x-ga-mp1-tr'] = eventModel.ecommerce.purchase.actionField.revenue;
       if (!eventModel.revenue)
         eventModel.revenue = eventModel.ecommerce.purchase.actionField.revenue;
       if (!eventModel.affiliation)
-        eventModel.affiliation =
-          eventModel.ecommerce.purchase.actionField.affiliation;
-      if (!eventModel.tax)
-        eventModel.tax = eventModel.ecommerce.purchase.actionField.tax;
+        eventModel.affiliation = eventModel.ecommerce.purchase.actionField.affiliation;
+      if (!eventModel.tax) eventModel.tax = eventModel.ecommerce.purchase.actionField.tax;
       if (!eventModel.shipping)
-        eventModel.shipping =
-          eventModel.ecommerce.purchase.actionField.shipping;
-      if (!eventModel.coupon)
-        eventModel.coupon = eventModel.ecommerce.purchase.actionField.coupon;
+        eventModel.shipping = eventModel.ecommerce.purchase.actionField.shipping;
+      if (!eventModel.coupon) eventModel.coupon = eventModel.ecommerce.purchase.actionField.coupon;
       if (!eventModel.transaction_id)
-        eventModel.transaction_id =
-          eventModel.ecommerce.purchase.actionField.id;
+        eventModel.transaction_id = eventModel.ecommerce.purchase.actionField.id;
     }
   }
 
   if (!eventModel.page_encoding && eventModel.pageEncoding)
     eventModel.page_encoding = eventModel.pageEncoding;
-  if (!eventModel.page_path && eventModel.pagePath)
-    eventModel.page_path = eventModel.pagePath;
-  if (!eventModel.page_title && eventModel.pageTitle)
-    eventModel.page_title = eventModel.pageTitle;
+  if (!eventModel.page_path && eventModel.pagePath) eventModel.page_path = eventModel.pagePath;
+  if (!eventModel.page_title && eventModel.pageTitle) eventModel.page_title = eventModel.pageTitle;
   if (!eventModel.screen_resolution && eventModel.screenResolution)
     eventModel.screen_resolution = eventModel.screenResolution;
   if (!eventModel.viewport_size && eventModel.viewportSize)
     eventModel.viewport_size = eventModel.viewportSize;
-  if (!eventModel.user_id && eventModel.userId)
-    eventModel.user_id = eventModel.userId;
+  if (!eventModel.user_id && eventModel.userId) eventModel.user_id = eventModel.userId;
 
   if (!eventModel.user_data) {
     let userData = {};
@@ -514,54 +488,38 @@ function addCommonParametersToEventModel(eventModel) {
 
     if (!userData.email_address) {
       if (eventModel.userEmail) userData.email_address = eventModel.userEmail;
-      else if (eventModel.email_address)
-        userData.email_address = eventModel.email_address;
+      else if (eventModel.email_address) userData.email_address = eventModel.email_address;
       else if (eventModel.email) userData.email_address = eventModel.email;
       else if (eventModel.mail) userData.email_address = eventModel.mail;
     }
 
     if (!userData.phone_number) {
-      if (eventModel.userPhoneNumber)
-        userData.phone_number = eventModel.userPhoneNumber;
-      else if (eventModel.phone_number)
-        userData.phone_number = eventModel.phone_number;
-      else if (eventModel.phoneNumber)
-        userData.phone_number = eventModel.phoneNumber;
+      if (eventModel.userPhoneNumber) userData.phone_number = eventModel.userPhoneNumber;
+      else if (eventModel.phone_number) userData.phone_number = eventModel.phone_number;
+      else if (eventModel.phoneNumber) userData.phone_number = eventModel.phoneNumber;
       else if (eventModel.phone) userData.phone_number = eventModel.phone;
     }
 
-    if (!userAddressData.street && eventModel.street)
-      userAddressData.street = eventModel.street;
-    if (!userAddressData.city && eventModel.city)
-      userAddressData.city = eventModel.city;
-    if (!userAddressData.region && eventModel.region)
-      userAddressData.region = eventModel.region;
+    if (!userAddressData.street && eventModel.street) userAddressData.street = eventModel.street;
+    if (!userAddressData.city && eventModel.city) userAddressData.city = eventModel.city;
+    if (!userAddressData.region && eventModel.region) userAddressData.region = eventModel.region;
     if (!userAddressData.country && eventModel.country)
       userAddressData.country = eventModel.country;
 
     if (!userAddressData.first_name) {
-      if (eventModel.userFirstName)
-        userAddressData.first_name = eventModel.userFirstName;
-      else if (eventModel.first_name)
-        userAddressData.first_name = eventModel.first_name;
-      else if (eventModel.firstName)
-        userAddressData.first_name = eventModel.firstName;
+      if (eventModel.userFirstName) userAddressData.first_name = eventModel.userFirstName;
+      else if (eventModel.first_name) userAddressData.first_name = eventModel.first_name;
+      else if (eventModel.firstName) userAddressData.first_name = eventModel.firstName;
       else if (eventModel.name) userAddressData.first_name = eventModel.name;
     }
 
     if (!userAddressData.last_name) {
-      if (eventModel.userLastName)
-        userAddressData.last_name = eventModel.userLastName;
-      else if (eventModel.last_name)
-        userAddressData.last_name = eventModel.last_name;
-      else if (eventModel.lastName)
-        userAddressData.last_name = eventModel.lastName;
-      else if (eventModel.surname)
-        userAddressData.last_name = eventModel.surname;
-      else if (eventModel.family_name)
-        userAddressData.last_name = eventModel.family_name;
-      else if (eventModel.familyName)
-        userAddressData.last_name = eventModel.familyName;
+      if (eventModel.userLastName) userAddressData.last_name = eventModel.userLastName;
+      else if (eventModel.last_name) userAddressData.last_name = eventModel.last_name;
+      else if (eventModel.lastName) userAddressData.last_name = eventModel.lastName;
+      else if (eventModel.surname) userAddressData.last_name = eventModel.surname;
+      else if (eventModel.family_name) userAddressData.last_name = eventModel.family_name;
+      else if (eventModel.familyName) userAddressData.last_name = eventModel.familyName;
     }
 
     if (!userAddressData.region) {
@@ -570,10 +528,8 @@ function addCommonParametersToEventModel(eventModel) {
     }
 
     if (!userAddressData.postal_code) {
-      if (eventModel.postal_code)
-        userAddressData.postal_code = eventModel.postal_code;
-      else if (eventModel.postalCode)
-        userAddressData.postal_code = eventModel.postalCode;
+      if (eventModel.postal_code) userAddressData.postal_code = eventModel.postal_code;
+      else if (eventModel.postalCode) userAddressData.postal_code = eventModel.postalCode;
       else if (eventModel.zip) userAddressData.postal_code = eventModel.zip;
     }
 
@@ -608,8 +564,7 @@ function getBaseEventModelWithQueryParameters() {
           eventModel[dtKey] = dt[dtKey];
         }
       } else {
-        eventModel[queryParameterKey] =
-          requestQueryParameters[queryParameterKey];
+        eventModel[queryParameterKey] = requestQueryParameters[queryParameterKey];
       }
     }
   }
@@ -686,10 +641,7 @@ function storeClientId(eventModel) {
 function setCommonResponseHeaders(statusCode) {
   setResponseHeader('Access-Control-Max-Age', '600');
   setResponseHeader('Access-Control-Allow-Origin', getRequestHeader('origin'));
-  setResponseHeader(
-    'Access-Control-Allow-Methods',
-    'GET,POST,PUT,DELETE,OPTIONS'
-  );
+  setResponseHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   setResponseHeader(
     'Access-Control-Allow-Headers',
     'content-type,set-cookie,x-robots-tag,x-gtm-server-preview,x-stape-preview,x-stape-app-version'
@@ -704,9 +656,7 @@ function getCookieType(eventModel) {
   }
 
   const host = getRequestHeader('host');
-  const effectiveTldPlusOne = computeEffectiveTldPlusOne(
-    eventModel.page_location
-  );
+  const effectiveTldPlusOne = computeEffectiveTldPlusOne(eventModel.page_location);
 
   if (!host || !effectiveTldPlusOne) {
     return 'Lax';
@@ -724,9 +674,7 @@ function prepareResponseBody(eventModels) {
     return;
   }
 
-  const responseModel = isEventModelsWrappedInArray
-    ? eventModels[0]
-    : eventModels;
+  const responseModel = isEventModelsWrappedInArray ? eventModels[0] : eventModels;
 
   setResponseHeader('Content-Type', 'application/json');
 
@@ -806,13 +754,11 @@ function getEventModels(baseEventModel) {
   if (body) {
     const contentType = getRequestHeader('content-type');
     const isFormUrlEncoded =
-      !!contentType &&
-      contentType.indexOf('application/x-www-form-urlencoded') !== -1;
+      !!contentType && contentType.indexOf('application/x-www-form-urlencoded') !== -1;
     let bodyJson = isFormUrlEncoded ? parseUrlEncoded(body) : JSON.parse(body);
     if (bodyJson) {
       const bodyType = getType(bodyJson);
-      const shouldUseOriginalBody =
-        data.acceptMultipleEvents && bodyType === 'array';
+      const shouldUseOriginalBody = data.acceptMultipleEvents && bodyType === 'array';
       if (!shouldUseOriginalBody) {
         bodyJson = [bodyJson];
         isEventModelsWrappedInArray = true;
@@ -822,8 +768,7 @@ function getEventModels(baseEventModel) {
         const eventModel = assign(
           {
             timestamp: makeInteger(getTimestampMillis() / 1000),
-            unique_event_id:
-              getTimestampMillis() + '_' + generateRandom(100000000, 999999999)
+            unique_event_id: getTimestampMillis() + '_' + generateRandom(100000000, 999999999)
           },
           baseEventModel
         );
@@ -839,8 +784,7 @@ function getEventModels(baseEventModel) {
     assign(
       {
         timestamp: makeInteger(getTimestampMillis() / 1000),
-        unique_event_id:
-          getTimestampMillis() + '_' + generateRandom(100000000, 999999999)
+        unique_event_id: getTimestampMillis() + '_' + generateRandom(100000000, 999999999)
       },
       baseEventModel
     )
@@ -850,8 +794,7 @@ function getEventModels(baseEventModel) {
 function getClientId(eventModels) {
   for (let i = 0; i < eventModels.length; i++) {
     const eventModel = eventModels[i];
-    const clientId =
-      eventModel.client_id || eventModel.data_client_id || eventModel._dcid;
+    const clientId = eventModel.client_id || eventModel.data_client_id || eventModel._dcid;
     if (clientId) return clientId;
   }
 
@@ -865,12 +808,7 @@ function getClientId(eventModels) {
       if (tempClientId) return tempClientId;
     }
 
-    return (
-      'dcid.1.' +
-      getTimestampMillis() +
-      '.' +
-      generateRandom(100000000, 999999999)
-    );
+    return 'dcid.1.' + getTimestampMillis() + '.' + generateRandom(100000000, 999999999);
   }
 
   return '';
@@ -909,9 +847,7 @@ function parseUrlEncoded(data) {
     const pairValue = pair.split('=');
     const key = pairValue[0];
     const value = pairValue[1];
-    const keys = key
-      .split('.')
-      .map((k) => decodeUriComponent(k.replace(regex, ' ')));
+    const keys = key.split('.').map((k) => decodeUriComponent(k.replace(regex, ' ')));
 
     let currentObject = parsedData;
 
