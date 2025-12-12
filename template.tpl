@@ -307,6 +307,7 @@ const getType = require('getType');
 const decodeUriComponent = require('decodeUriComponent');
 const createRegex = require('createRegex');
 const makeString = require('makeString');
+const Object = require('Object');
 
 /*==============================================================================
 ==============================================================================*/
@@ -348,6 +349,7 @@ function runClient() {
     eventModel = addRequiredParametersToEventModel(eventModel);
     eventModel = addCommonParametersToEventModel(eventModel);
     eventModel = addClientIdToEventModel(eventModel, clientId);
+    if (eventModel._dcid_temp) Object.delete(eventModel, '_dcid_temp');
     return eventModel;
   });
 
@@ -857,6 +859,12 @@ function getClientId(eventModels) {
   if (dcid && dcid[0]) return dcid[0];
 
   if (data.generateClientId) {
+    for (let i = 0; i < eventModels.length; i++) {
+      const eventModel = eventModels[i];
+      const tempClientId = eventModel._dcid_temp;
+      if (tempClientId) return tempClientId;
+    }
+
     return (
       'dcid.1.' +
       getTimestampMillis() +
@@ -864,6 +872,7 @@ function getClientId(eventModels) {
       generateRandom(100000000, 999999999)
     );
   }
+
   return '';
 }
 
@@ -1233,8 +1242,6 @@ ___SERVER_PERMISSIONS___
 ___TESTS___
 
 scenarios:
-- name: Quick Test
-  code: runCode();
 - name: runContainer is called succesfully for a single event and response is sent
     back once
   code: "mock('getRequestPath', '/data');\nmock('requestMethod', 'POST');\nmock('getRequestBody',\
@@ -1298,10 +1305,70 @@ scenarios:
     mock('runContainer', (eventData, onCompleteCallback, onStartCallback) => {\n \
     \ onCompleteCallback();\n});\n\nrunCode(mockData);\n\ncallLater(() => {\n  assertThat(claimRequestWasCalled).isTrue();\n\
     \  assertApi('returnResponse').wasCalled();\n});"
+- name: Client ID retrieval and generation (from _dcid cookie, from Event Data pre-defined
+    keys and from Temporary Client ID)
+  code: "const originalMockData = mockData;\n\nmock('getRequestPath', '/data');\n\
+    mock('requestMethod', 'POST');\n\n[\n  {\n    description: 'Should use Client\
+    \ ID from Event Model if one is present',\n    mockData: {\n      generateClientId:\
+    \ true,\n      acceptMultipleEvents: true\n    },\n    mock: () => {\n      mock('getRequestBody',\
+    \ '[{\"event\":\"page_view\",\"client_id\":\"client_id\",\"_dcid_temp\":\"_dcid_temp\"\
+    },{\"event\":\"view_item\",\"_dcid\":\"_dcid\",\"_dcid_temp\":\"_dcid_temp\"}]');\n\
+    \      mock('getCookieValues', []);\n    },\n    assert: (eventData) => {\n  \
+    \    assertThat(eventData.client_id).isEqualTo('client_id'); // The first found\
+    \ Client ID is used for all events in the payload.\n    }\n  },\n  {\n    description:\
+    \ 'Should use Client ID from _dcid cookie if present and no Client ID is present\
+    \ in Event Model',\n    mockData: {\n      generateClientId: true,\n      acceptMultipleEvents:\
+    \ true\n    }, \n    mock: () => {\n      mock('getRequestBody', '[{\"event\"\
+    :\"page_view\",\"_dcid_temp\":\"_dcid_temp\"},{\"event\":\"view_item\",\"_dcid_temp\"\
+    :\"_dcid_temp\"}]');\n      mock('getCookieValues', ['_dcid_from_cookie']);\n\
+    \    },\n    assert: (eventData) => {\n      assertThat(eventData.client_id).isEqualTo('_dcid_from_cookie');\n\
+    \    }\n  },\n  { \n    description: 'Should use Client ID from temporary Client\
+    \ ID if option is enabled, and it is present in Event Model and, _dcid cookie\
+    \ or Client ID in Event Data do not exist',\n    mockData: {\n      generateClientId:\
+    \ true,\n      acceptMultipleEvents: true\n    },\n    mock: () => {\n      mock('getRequestBody',\
+    \ '[{\"event\":\"page_view\",\"_dcid_temp\":\"_dcid_temp\"},{\"event\":\"view_item\"\
+    ,\"_dcid_temp\":\"_dcid_temp\"}]');\n      mock('getCookieValues', []);\n    },\n\
+    \    assert: (eventData) => {\n      assertThat(eventData.client_id).isEqualTo('_dcid_temp');\n\
+    \    }\n  },\n  { \n    description: 'Should generate a random Client ID if option\
+    \ is enabled, and _dcid cookie or Client ID in Event Data or temporary Client\
+    \ ID do not exist',\n    mockData: {\n      generateClientId: true,\n      acceptMultipleEvents:\
+    \ true\n    },\n    mock: () => {\n      mock('getRequestBody', '[{\"event\":\"\
+    page_view\"},{\"event\":\"view_item\"}]');\n      mock('getCookieValues', []);\n\
+    \    },\n    assert: (eventData) => {\n      assertThat(eventData.client_id).isEqualTo('dcid.1.1747945830456.123456789');\n\
+    \    }\n  },\n  { \n    description: 'Should NOT generate a random Client ID or\
+    \ use temporary Client ID if option is disabled',\n    mockData: {\n      generateClientId:\
+    \ false,\n      acceptMultipleEvents: true\n    },\n    mock: () => {\n      mock('getRequestBody',\
+    \ '[{\"event\":\"page_view\"},{\"event\":\"view_item\"}]');\n      mock('getCookieValues',\
+    \ []);\n    },\n    assert: (eventData) => {\n      assertThat(eventData.client_id).isFalsy();\n\
+    \    }\n  }\n].forEach(scenario => {\n  const copyMockData = JSON.parse(JSON.stringify(originalMockData));\n\
+    \  mergeObj(copyMockData, scenario.mockData);\n  \n  scenario.mock();\n  \n  /*\
+    \ \n    For some reason when we use \"assertApi('claimRequest').wasCalled()\"\
+    \ AND we run all the tests,\n    it produces the following error \"Tried to claim\
+    \ a request after a Client had returned. Calling claimRequest from a callback\
+    \ is not supported.\"\n    If we run only this single test, the error does not\
+    \ occur.\n    A workaround is to mock 'claimRequest' API and make a dummy assertion\
+    \ in the mocked function. This way we make sure it's been called.\n  */\n  let\
+    \ claimRequestWasCalled;\n  mock('claimRequest', () => {\n    claimRequestWasCalled\
+    \ = true;\n  });\n  \n  mock('setResponseStatus', (responseStatus) => {\n    assertThat(responseStatus).isEqualTo(200);\n\
+    \  });\n  \n  /*\n    For some reason when we mock 'claimRequest', the following\
+    \ error is shown when the test is run: 'Request must be claimed before calling\
+    \ runContainer.'\n    A workaround is to mock 'runContainer' and simply call its\
+    \ callbacks.\n  */\n  mock('runContainer', (eventData, onCompleteCallback, onStartCallback)\
+    \ => {\n    assertThat(eventData.hasOwnProperty('_temp_dcid')).isFalse();\n  \
+    \  scenario.assert(eventData);\n    onCompleteCallback();  \n  });\n  \n  runCode(copyMockData);\n\
+    \  \n  callLater(() => {\n    assertThat(claimRequestWasCalled).isTrue();\n  \
+    \  assertApi('returnResponse').wasCalled();\n  });\n});"
 setup: |-
   const JSON = require('JSON');
   const Object = require('Object');
   const callLater = require('callLater');
+
+  function mergeObj(target, source) {
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) target[key] = source[key];
+    }
+    return target;
+  }
 
   const mockData = {
     responseStatusCode: 200,
